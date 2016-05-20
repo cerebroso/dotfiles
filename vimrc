@@ -1,6 +1,5 @@
 call plug#begin('~/.vim/plugged')
 
-Plug 'Shougo/unite.vim'
 Plug 'Shougo/neocomplete.vim'
 Plug 'Shougo/neosnippet'
 Plug 'Shougo/neosnippet-snippets'
@@ -11,12 +10,33 @@ Plug 'Shougo/vimproc.vim'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-endwise'
 Plug 'vim-ruby/vim-ruby'
 Plug 'Shougo/neomru.vim'
-Plug 'jdkanani/vim-material-theme'
-Plug 'gregsexton/Atom'
-Plug 'tomasr/molokai'
 Plug 'kchmck/vim-coffee-script'
+Plug 'benekastah/neomake'
+Plug 'vim-scripts/matchit.zip'
+Plug 'itchyny/lightline.vim'
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
+Plug 'easymotion/vim-easymotion'
+
+" Colors
+Plug 'gregsexton/Atom'
+Plug 'gosukiwi/vim-atom-dark'
+Plug 'jdkanani/vim-material-theme'
+Plug 'tomasr/molokai'
+Plug 'altercation/vim-colors-solarized'
+Plug 'tstelzer/welpe.vim'
+Plug 'notpratheek/vim-luna'
+Plug 'zandrmartin/vim-distill'
+Plug 'scwood/vim-hybrid'
+Plug 'marciomazza/vim-brogrammer-theme'
+Plug 'trevorrjohn/vim-obsidian'
+Plug 'vim-scripts/obsidian2.vim'
+Plug 'atelierbram/vim-colors_duotones'
+Plug 'joshdick/onedark.vim'
+Plug 'mkarmona/colorsbox'
 
 call plug#end()
 
@@ -27,8 +47,24 @@ set expandtab
 set autoindent
 
 syntax enable
+" let g:solarized_termcolors=256
 set background=dark
-colorscheme atom
+" colorscheme solarized
+" colorscheme brogrammer
+" or any of the other schemes:
+" colorscheme duotone-darkearth
+" colorscheme duotone-darkdesert
+" colorscheme duotone-darkforest
+" colorscheme duotone-darkpark
+" colorscheme duotone-darkmeadow
+" colorscheme duotone-darksea
+" colorscheme duotone-darkpool
+" colorscheme duotone-darkspace
+" colorscheme duotone-dark
+" colorscheme duotone-darkheath
+" colorscheme duotone-darkcave
+colorscheme colorsbox-material
+
 set guioptions-=m  "remove menu bar
 set guioptions-=T  "remove toolbar
 set guifont=Droid\ Sans\ Mono\ 11
@@ -36,32 +72,6 @@ set guifont=Droid\ Sans\ Mono\ 11
 nnoremap <S-F1> :if &go=~#'m'<Bar>set go-=m<Bar>else<Bar>set go+=m<Bar>endif<CR>
 nnoremap <S-F2> :if &go=~#'T'<Bar>set go-=T<Bar>else<Bar>set go+=T<Bar>endif<CR>
 nnoremap <S-F3> :if &go=~#'r'<Bar>set go-=r<Bar>else<Bar>set go+=r<Bar>endif<CR>
-
-call unite#filters#matcher_default#use(['matcher_fuzzy'])
-"call unite#filters#sorter_default#use(['sorter_rank'])
-call unite#filters#sorter_default#use(['sorter_length'])
-
-let g:unite_enable_start_insert=1
-let g:unite_source_history_yank_enable = 1
-
-"let g:unite_prompt='» '
-"let g:unite_split_rule = 'botright'
-if executable('ag')
-  let g:unite_source_grep_command='ag'
-  let g:unite_source_grep_default_opts='--nocolor --nogroup -S -C4'
-  let g:unite_source_grep_recursive_opt=''
-endif
-
-call unite#custom#source( 'buffer', 'converters', ['converter_file_directory'])
-
-"nnoremap <C-p> :Unite file/async file_rec/async file_mru<cr>
-"nnoremap <C-p> :Unite -buffer-name=files file/async:!<cr>
-"nnoremap <silent> <c-p> :Unite -auto-resize file/async file_mru file_rec<cr>
-nnoremap <silent> <C-p> :Unite file/async file_rec/async buffer file_mru<CR>
-"nnoremap <C-/> :Unite line<CR>
-nnoremap <space>/ :Unite grep:.<cr>
-nnoremap <space>y :Unite history/yank<cr>
-nnoremap <space>s :Unite -quick-match buffer<cr>
 
 "Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
 " Disable AutoComplPop.
@@ -75,11 +85,11 @@ let g:neocomplete#sources#syntax#min_keyword_length = 3
 let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
 
 " Define dictionary.
-let g:neocomplete#sources#dictionary#dictionaries = {
-    \ 'default' : '',
-    \ 'vimshell' : $HOME.'/.vimshell_hist',
-    \ 'scheme' : $HOME.'/.gosh_completions'
-        \ }
+" let g:neocomplete#sources#dictionary#dictionaries = {
+"     \ 'default' : '',
+"     \ 'vimshell' : $HOME.'/.vimshell_hist',
+"     \ 'scheme' : $HOME.'/.gosh_completions'
+"         \ }
 
 " Define keyword.
 if !exists('g:neocomplete#keyword_patterns')
@@ -134,3 +144,38 @@ endif
 " For perlomni.vim setting.
 " https://github.com/c9s/perlomni.vim
 let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+
+" Tab navigation like Firefox.
+map <C-S-Tab> :tabprevious<CR>
+map <C-Tab>   :tabnext<CR>
+map <C-t>     :tabnew<CR>
+" inoremap <C-S-tab> <Esc>:tabprevious<CR>i
+" inoremap <C-tab>   <Esc>:tabnext<CR>i
+" inoremap <C-t>     <Esc>:tabnew<CR>
+
+set rtp+=~/.fzf
+
+" FZF {{{
+" <C-p> or <C-t> to search files
+nnoremap <silent> <C-t> :FZF -m<cr>
+nnoremap <silent> <C-p> :FZF -m<cr>
+
+" <M-p> for open buffers
+nnoremap <silent> <M-p> :Buffers<cr>
+
+" <M-S-p> for MRU
+nnoremap <silent> <M-S-p> :History<cr>
+
+" Use fuzzy completion relative filepaths across directory
+imap <expr> <c-x><c-f> fzf#vim#complete#path('git ls-files $(git rev-parse --show-toplevel)')
+
+" Better command history with q:
+command! CmdHist call fzf#vim#command_history({'right': '40'})
+nnoremap q: :CmdHist<CR>
+
+" Better search history
+command! QHist call fzf#vim#search_history({'right': '40'})
+nnoremap q/ :QHist<CR>
+
+command! -bang -nargs=* Ack call fzf#vim#ag(<q-args>, {'down': '40%', 'options': --no-color'})
+" }}}
